@@ -1,7 +1,9 @@
 package com.omt.Util;
 
+import com.serotonin.modbus4j.ModbusFactory;
 import com.serotonin.modbus4j.ModbusMaster;
 import com.serotonin.modbus4j.exception.ModbusTransportException;
+import com.serotonin.modbus4j.ip.IpParameters;
 import com.serotonin.modbus4j.msg.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -13,6 +15,47 @@ import java.util.Arrays;
 import java.util.Enumeration;
 
 public class ModbusUtil {
+
+    /**
+     * 获取modbus master工厂
+     * @return
+     */
+    public static ModbusMaster getRtuMaster() {
+        String commPortId = "COM6";
+        int baudRate = 9600;
+        int flowControlIn = 0;
+        int flowControlOut = 0;
+        int dataBits = 8;
+        int stopBits = 1;
+        int parity = 0;
+        SerialPortWrapperImpl wrapper = new SerialPortWrapperImpl(commPortId, baudRate, dataBits, stopBits, parity, flowControlIn, flowControlOut);
+        IpParameters ipParameters = new IpParameters();
+        ipParameters.setPort(502);
+        ModbusFactory modbusFactory = new ModbusFactory();
+
+        ModbusMaster master = modbusFactory.createRtuMaster(wrapper);
+        return master;
+        //ModbusMaster master = modbusFactory.createTcpMaster(ipParameters, false);
+        /*SerialParameters serialParameters = new SerialParameters();
+        // 设定MODBUS通讯的串行口
+        serialParameters.setCommPortId("COM5");
+        // 设置端口波特率
+        serialParameters.setBaudRate(9600);
+        //硬件之间输入流应答控制
+        serialParameters.setFlowControlIn(0);
+        //硬件之间输出流应答控制
+        serialParameters.setFlowControlOut(0);
+        //设定数据位的位数  RTU:8位    ASCII:7位
+        serialParameters.setDataBits(8);
+        //奇偶校验位  无校验：0 奇校验：1 偶校验：2
+        serialParameters.setParity(0);
+        //停止位的位数，如果无奇偶校验为2，有奇偶校验为1
+        serialParameters.setStopBits(1);
+        // 设置端口名称
+        serialParameters.setPortOwnerName("RTU");
+        // 创建ModbusMaster工厂实例
+        return new ModbusFactory().createRtuMaster(serialParameters);*/
+    }
     /**
      * @Function 02
      * @param master

@@ -33,35 +33,17 @@ public class ModbusController {
     @RequestMapping(value = "/getRTUModbusData")
     public JSONObject getModbusData() throws SocketException, UnknownHostException {
 
+        Map resultMap = new HashMap();
         String disc = "";
-        String hold = "";
 
-        Map<String,Object> resultMap = new HashMap<String,Object>();
-
-        String commPortId = "COM6";
-        int baudRate = 2400;
-        int flowControlIn = 0;
-        int flowControlOut = 0;
-        int dataBits = 8;
-        int stopBits = 1;
-        int parity = 0;
-
-        //RTU
-        ModbusFactory modbusFactory = new ModbusFactory();
-        SerialPortWrapperImpl wrapper = new SerialPortWrapperImpl(commPortId, baudRate, flowControlIn, flowControlOut, dataBits, stopBits, parity);
-        //ModbusMaster master = modbusFactory.createRtuMaster(wrapper);  //RTU
-        //TCP
-        IpParameters ipParameters = new IpParameters();
-        ipParameters.setHost("127.0.0.1");
-        ipParameters.setPort(502);
-        ModbusMaster master = modbusFactory.createTcpMaster(ipParameters, false);
+        ModbusMaster master = ModbusUtil.getRtuMaster();
 
         try{
             master.init();
             int slaveId = 1;        //设备ID
 
             disc = ModbusUtil.readDiscreteInput(master, slaveId, 0, 24);   /////读状态数据32
-            hold = ModbusUtil.readHoldingRegisters(master, slaveId, 16, 10);  ////读电压电流数据  ----//64
+            //hold = ModbusUtil.readHoldingRegisters(master, slaveId, 16, 10);  ////读电压电流数据  ----//64
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -72,7 +54,6 @@ public class ModbusController {
 
         //String hold = "[220,220,220,220,220,220,5,6]";
         //String coil = "[true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,true,false,true,false,false,false,false]";
-        resultMap.put("hold",subString(hold));
         resultMap.put("disc",subString(disc));
         resultMap.put("ip",ip);
         resultMap.put("mac",mac);
@@ -102,15 +83,6 @@ public class ModbusController {
         JSONObject json = JSONObject.fromObject(resultMap);
         HttpClientUtil.doPostJson("http://192.168.31.230:8081/test1",json.toString());
 
-
-        /*ModbusFactory modbusFactory = new ModbusFactory();
-        IpParameters ipParameters = new IpParameters();
-        ipParameters.setHost("127.0.0.1");
-        ipParameters.setPort(502);
-        ModbusMaster master = modbusFactory.createTcpMaster(ipParameters, false);
-
-        ModbusUtil.writeRegisters(master,1,0,new short[]{1,10,20,30,120,220,2220,22220});
-        ModbusUtil.writeCoils(master,1,0,new boolean[]{true,false});*/
     }
 
     /**
